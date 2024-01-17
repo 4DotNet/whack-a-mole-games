@@ -49,6 +49,16 @@ module storageAccountConfigurationValue 'configuration-value.bicep' = {
   }
 }
 
+module serviceNameConfigurationValue 'configuration-value.bicep' = {
+  name: 'serviceNameConfigurationValue'
+  scope: resourceGroup(integrationEnvironment.resourceGroup)
+  params: {
+    appConfigurationName: integrationEnvironment.appConfiguration
+    settingName: 'Services:GameService'
+    settingValue: containerAppName
+  }
+}
+
 resource apiContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: '${defaultResourceName}-aca'
   location: location
