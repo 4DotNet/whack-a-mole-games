@@ -55,7 +55,7 @@ module serviceNameConfigurationValue 'configuration-value.bicep' = {
   params: {
     appConfigurationName: integrationEnvironment.appConfiguration
     settingName: 'Services:GamesService'
-    settingValue: apiContainerApp.name
+    settingValue: 'https://${apiContainerApp.name}'
   }
 }
 
