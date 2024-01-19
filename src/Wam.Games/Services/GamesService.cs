@@ -180,25 +180,25 @@ public class GamesService(
 
     }
 
-    private async Task PlayerAddedEvent(string code, Player player)
+    private Task PlayerAddedEvent(string code, Player player)
     {
         var message = new RealtimeEvent<GamePlayerDto>
         {
             Message = "PlayerAdded",
             Data = new GamePlayerDto(player.Id, player.DisplayName, player.EmailAddress, player.IsBanned)
         };
-        await pubsubClient.SendToGroupAsync(code, message.ToJson(), ContentType.ApplicationJson);
+        return RaiseEvent(message, code);
     }
-    private async Task PlayerRemovedEvent(string code, Guid playerId)
+    private Task PlayerRemovedEvent(string code, Guid playerId)
     {
         var message = new RealtimeEvent<GamePlayerDto>
         {
             Message = "PlayerRemoved",
             Data = new GamePlayerDto(playerId, string.Empty, string.Empty, false)
         };
-        await pubsubClient.SendToGroupAsync(code, message.ToJson(), ContentType.ApplicationJson);
+        return RaiseEvent(message, code);
     }
-    private async Task GameStateChangedEvent(Game game)
+    private Task GameStateChangedEvent(Game game)
     {
         var message = new RealtimeEvent<GameStateChangedDto>
         {
@@ -206,7 +206,19 @@ public class GamesService(
             Data = new GameStateChangedDto(game.Id, game.Code, game.State.Code, game.CreatedOn, game.StartedOn,
                 game.FinishedOn)
         };
-        await pubsubClient.SendToGroupAsync(game.Code, message.ToJson(), ContentType.ApplicationJson);
+        return RaiseEvent(message, game.Code);
+    }
+
+    private async Task RaiseEvent<T>(RealtimeEvent<T> realtimeEvent, string group)
+    {
+        try
+        {
+            await pubsubClient.SendToGroupAsync(group, realtimeEvent.ToJson(), ContentType.ApplicationJson);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to raise event {event} to group {group}", realtimeEvent.Message, group);
+        }
     }
 
     private async Task<GameDetailsDto> SaveAndReturnDetails(Game game, CancellationToken cancellationToken)
