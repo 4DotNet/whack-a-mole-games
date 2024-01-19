@@ -1,5 +1,4 @@
 ﻿using Azure.Data.Tables;
-using HexMaster.RedisCache.Abstractions;
 using Microsoft.Extensions.Options;
 using Wam.Core.Configuration;
 using Wam.Core.Enums;
@@ -14,8 +13,6 @@ namespace Wam.Games.Repositories;
 
 public class GamesRepository : IGamesRepository
 {
-    private readonly ICacheClient _createClient;
-
     private const string TableName = "games";
     private const string PartitionKey = "game";
     private readonly TableClient _tableClient;
@@ -58,20 +55,12 @@ public class GamesRepository : IGamesRepository
                 cancellationToken);
         }
 
-        if (response.Status.IsHttpSuccessCode())
-        {
-            await UpdateCache(entity);
-            await UpdatePlayersCache(game.Id, players);
-            return true;
-        }
-
-        return false;
+        return response.Status.IsHttpSuccessCode();
     }
     
     public async Task<Game> Get(Guid gameId, CancellationToken cancellationToken)
     {
-        var cacheKey = $"game:{gameId}";
-        var entity = await _createClient.GetOrInitializeAsync(() => GetFromTableStorage(gameId, cancellationToken), cacheKey);
+        var entity = await GetFromTableStorage(gameId, cancellationToken);
         var players = await GetGamePlayers(gameId, cancellationToken);
         return new Game(gameId,
             entity.Code,
@@ -84,10 +73,7 @@ public class GamesRepository : IGamesRepository
 
     public async Task<Game> GetByCode(string code, CancellationToken cancellationToken)
     {
-        var cacheKey = $"game:code:{code}";
-        var entity =
-            await _createClient.GetOrInitializeAsync(() => GetFromTableStorageByCode(code, cancellationToken),
-                cacheKey);
+        var entity = await GetFromTableStorageByCode(code, cancellationToken);
         var players = await GetGamePlayers(Guid.Parse(entity.RowKey), cancellationToken);
 
         return new Game(Guid.Parse(entity.RowKey),
@@ -152,18 +138,6 @@ public class GamesRepository : IGamesRepository
         return false;
     }
 
-
-    private Task UpdateCache(GameEntity entity)
-    {
-        var cacheKey = $"game:{entity.RowKey}";
-        return _createClient.SetAsAsync(cacheKey, entity);
-    }
-    private Task UpdatePlayersCache(Guid gameId, List<GamePlayerEntity> entities)
-    {
-        var cacheKey = $"players:{gameId}";
-        return _createClient.SetAsAsync(cacheKey, entities);
-    }
-
     private async Task<GameEntity> GetFromTableStorage(Guid gameId, CancellationToken cancellationToken)
     {
         var cloudResponse = await _tableClient.GetEntityAsync<GameEntity>(
@@ -198,8 +172,7 @@ public class GamesRepository : IGamesRepository
 
     private async Task<List<Player>> GetGamePlayers(Guid gameId, CancellationToken cancellationToken)
     {
-        var cacheKey = $"players:{gameId}";
-        var entities = await _createClient.GetOrInitializeAsync(() => GetGamePlayersFromRepository(gameId, cancellationToken), cacheKey);
+        var entities = await GetGamePlayersFromRepository(gameId, cancellationToken);
 
         return entities.Select(ent => new Player(
             Guid.Parse(ent.RowKey),
@@ -222,10 +195,8 @@ public class GamesRepository : IGamesRepository
     }
 
     public GamesRepository(
-        IOptions<AzureServices> configuration,
-        ICacheClientFactory cacheClientFactory)
+        IOptions<AzureServices> configuration)
     {
-        _createClient = cacheClientFactory.CreateClient();
         var tableStorageUrl = $"https://{configuration.Value.GamesStorageAccountName}.table.core.windows.net";
         _tableClient = new TableClient(new Uri(tableStorageUrl), TableName, CloudIdentity.GetCloudIdentity());
     }

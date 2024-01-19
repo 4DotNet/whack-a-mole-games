@@ -12,7 +12,7 @@
     <PackageReference Include="HexMaster.DomainDrivenDesign" Version="2.0.5" />
     <PackageReference Include="HexMaster.RedisCache.Abstractions" Version="0.1.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Wam.Core" Version="0.1.8" />
+    <PackageReference Include="Wam.Core" Version="0.1.9" />
   </ItemGroup>
 
   <ItemGroup>
