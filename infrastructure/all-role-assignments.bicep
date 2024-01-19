@@ -26,8 +26,9 @@ module storageAccountDataReaderRoleAssignmentForDevelopers 'roleAssignment.bicep
 
 resource webPubSubServiceOwnerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
   scope: resourceGroup(integrationResourceGroupName)
-  name: '8cf5e20a-e4b2-4e9d-b3a1-5ceb692c2761'
+  name: '7e4f1700-ea5a-4f59-8f37-079cfe29dce3'
 }
+
 module webPubSubServiceOwnerRoleAssignment 'roleAssignment.bicep' = {
   name: 'webPubSubServiceOwnerRoleAssignmentModule'
   scope: resourceGroup(integrationResourceGroupName)
