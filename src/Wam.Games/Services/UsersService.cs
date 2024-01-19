@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Wam.Core.Cache;
 using Wam.Core.Configuration;
 using Wam.Games.DataTransferObjects;
 
@@ -19,7 +20,8 @@ public class UsersService : IUsersService
     {
         _logger.LogInformation("Getting player details from users service {userId}", userId);
         var cacheClient = _cacheClientFactory.CreateClient();
-        return cacheClient.GetOrInitializeAsync(() => GetPlayerDetailsFromRemoteServer(userId, cancellationToken), "X");
+        var cacheKey = CacheName.UserDetails(userId);
+        return cacheClient.GetOrInitializeAsync(() => GetPlayerDetailsFromRemoteServer(userId, cancellationToken), cacheKey);
     }
     private async Task<PlayerDetailsDto?> GetPlayerDetailsFromRemoteServer(Guid userId, CancellationToken cancellationToken)
     {
