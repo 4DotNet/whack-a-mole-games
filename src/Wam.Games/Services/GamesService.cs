@@ -3,6 +3,7 @@ using Azure.Messaging.WebPubSub;
 using HexMaster.RedisCache.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Wam.Core.Cache;
 using Wam.Core.Events;
 using Wam.Games.DataTransferObjects;
 using Wam.Games.DomainModels;
@@ -25,6 +26,7 @@ namespace Wam.Games.Services;
 public class GamesService(
     IGamesRepository gamesRepository,
     ICacheClientFactory cacheClientFactory,
+    IUsersService usersService,
     IConfiguration configuration,
     WebPubSubServiceClient pubsubClient,
     ILogger<GamesService> logger) : IGamesService
@@ -86,8 +88,13 @@ public class GamesService(
             useVouchers = value;
         }
 
-        //var user = await usersRepository.Get(userId, cancellationToken);
-        //var playerModel = new Player(user.Id, user.DisplayName, user.EmailAddress, user.IsExcluded);
+        var userDetails = await usersService.GetPlayerDetails(userId, cancellationToken);
+        if (userDetails == null)
+        {
+            throw new WamGameException(WamGameErrorCode.PlayerNotFound,
+                               $"The player with id {userId} was not found in the system");
+        }
+        var playerModel = new Player(userDetails.Id, userDetails.DisplayName, userDetails.EmailAddress, userDetails.IsExcluded);
         //if (useVouchers)
         //{
         //    logger.LogInformation("Vouchers are enabled, validating voucher {voucher}", voucher);
@@ -104,10 +111,10 @@ public class GamesService(
         //    }
         //}
 
-        //game.AddPlayer(playerModel);
+        game.AddPlayer(playerModel);
 
         var dto = await SaveAndReturnDetails(game, cancellationToken);
-        //await PlayerAddedEvent(code, playerModel);
+        await PlayerAddedEvent(code, playerModel);
         return dto;
     }
     public async Task<GameDetailsDto> Leave(Guid gameId, Guid playerId, CancellationToken cancellationToken)
@@ -242,8 +249,8 @@ public class GamesService(
     {
         try
         {
-            var cacheKeyById = $"wam:game:id:{dto.Id}";
-            var cacheKeyByCode = $"wam:game:code:{dto.Code}";
+            var cacheKeyById = CacheName.GameDetails(dto.Id);
+            var cacheKeyByCode = CacheName.GameDetails(dto.Code);
             var cacheClient = cacheClientFactory.CreateClient();
             await cacheClient.SetAsAsync(cacheKeyById, dto);
             await cacheClient.SetAsAsync(cacheKeyByCode, dto);

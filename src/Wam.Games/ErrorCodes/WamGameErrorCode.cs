@@ -11,9 +11,11 @@ public abstract class WamGameErrorCode : WamErrorCode
     public static WamGameErrorCode NewGameAlreadyExists => new GameNotFound();
     public static WamGameErrorCode ActiveGameAlreadyExists => new GameNotFound();
     public static WamGameErrorCode InvalidGameVoucher => new GameNotFound();
+    public static WamGameErrorCode PlayerNotFound => new PlayerNotFound();
 
     public override string Namespace => $"{base.Namespace}.Games";
 }
+
 
 public class GameNotFound : WamGameErrorCode
 {
@@ -48,4 +50,9 @@ public class ActiveGameAlreadyExists : WamGameErrorCode
 public class InvalidGameVoucher : WamGameErrorCode
 {
     public override string Code => nameof(InvalidGameVoucher);
+}
+
+public class PlayerNotFound : WamGameErrorCode
+{
+    public override string Code => nameof(PlayerNotFound);
 }

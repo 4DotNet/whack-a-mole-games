@@ -1,8 +1,12 @@
+using Polly.Extensions.Http;
+using Polly;
 using Wam.Api.Infrastructure;
 using Wam.Api.Infrastructure.Swagger;
 using Wam.Core.Configuration;
 using Wam.Core.ExtensionMethods;
 using Wam.Core.Identity;
+using Wam.Games;
+using Wam.Games.Services;
 
 var corsPolicyName = "DefaultCors";
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +26,10 @@ catch (Exception ex)
     throw new Exception("Failed to configure the Whack-A-Mole Users service, Azure App Configuration failed", ex);
 }
 // Add services to the container.
+
+builder.Services.AddHttpClient<IUsersService, UsersService>()
+    .AddStandardResilienceHandler();
+
 
 builder.Services
     .AddWamCoreConfiguration(builder.Configuration)
@@ -63,3 +71,19 @@ app.MapControllers();
 Console.WriteLine("Starting...");
 app.Run();
 Console.WriteLine("Stopped");
+
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        .WaitAndRetryAsync(4, retryAttempt => TimeSpan.FromSeconds(2));
+}
+
+static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        .CircuitBreakerAsync(3, TimeSpan.FromSeconds(11));
+}
