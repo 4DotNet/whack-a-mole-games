@@ -23,6 +23,24 @@ public class UsersService : IUsersService
         var cacheKey = CacheName.UserDetails(userId);
         return cacheClient.GetOrInitializeAsync(() => GetPlayerDetailsFromRemoteServer(userId, cancellationToken), cacheKey);
     }
+
+    public async Task<PlayerDetailsDto?> BanUser(Guid userId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogInformation("Make a user ban request to the users API {userId}", userId);
+            var uri = $"{_remoteServiceBaseUrl}/Users/{userId}/Ban";
+            _logger.LogInformation("Making request to {userDetailsUrl}", uri);
+            var responseString = await _httpClient.GetStringAsync(uri, cancellationToken);
+            return JsonConvert.DeserializeObject<PlayerDetailsDto>(responseString);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while making a user ban request to the users API {userId}", userId);
+            throw;
+        }
+    }
+
     private async Task<PlayerDetailsDto?> GetPlayerDetailsFromRemoteServer(Guid userId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Downloading user information from users service for user {userId}", userId);

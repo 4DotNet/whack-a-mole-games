@@ -167,7 +167,16 @@ public class GamesService(
 
         var dto = await SaveAndReturnDetails(game, cancellationToken);
         await UpdateCache(dto);
-        await PlayerRemovedEvent(game.Code, playerId);
+        try
+        {
+            await usersService.BanUser(playerId, cancellationToken);
+            await PlayerRemovedEvent(game.Code, playerId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Player was removed from the game, but failed to ban the user as a user {playerId}", playerId);
+        }
+
         return true;
     }
 
