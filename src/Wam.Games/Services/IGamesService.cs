@@ -13,6 +13,8 @@ public interface IGamesService
     Task<GameDetailsDto> Join(string code, Guid userId, string? voucherCode, CancellationToken cancellationToken);
     Task<GameDetailsDto> Leave(Guid gameId, Guid userId, CancellationToken cancellationToken);
 
+    Task<bool> DeletePlayer(Guid gameId, Guid playerId, CancellationToken cancellationToken);
+
     Task<GameDetailsDto> Activate(Guid gameId, CancellationToken cancellationToken);
     Task<GameDetailsDto> Start(Guid gameId, CancellationToken cancellationToken);
     Task<GameDetailsDto> Finish(Guid gameId, CancellationToken cancellationToken);
