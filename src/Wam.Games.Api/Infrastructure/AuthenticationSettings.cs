@@ -1,4 +1,4 @@
-﻿namespace Wam.Api.Infrastructure
+﻿namespace Wam.Games.Api.Infrastructure
 {
     public class AuthenticationSettings
     {

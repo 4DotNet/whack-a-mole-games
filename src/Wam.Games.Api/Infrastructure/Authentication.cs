@@ -4,9 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
-using Wam.Api.Infrastructure;
 
-namespace Wam.Users.Api.Infrastructure;
+namespace Wam.Games.Api.Infrastructure;
 
 public static class Authentication
 {
