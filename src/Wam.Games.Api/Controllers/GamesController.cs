@@ -39,6 +39,21 @@ public class GamesController(IGamesService gamesService) : ControllerBase
         return Ok(nextGame);
     }
 
+    [AllowAnonymous]
+    [HttpDelete("{id:guid}/player/{playerId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> DeletePlayer(Guid id, Guid playerId, CancellationToken cancellationToken)
+    {
+        var nextGame = await gamesService.DeletePlayer(id, playerId, cancellationToken);
+        if (nextGame)
+        {
+            return Ok();
+        }
+
+        return BadRequest();
+    }
+
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> Create(CancellationToken cancellationToken)

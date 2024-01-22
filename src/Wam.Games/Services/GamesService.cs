@@ -151,6 +151,26 @@ public class GamesService(
         return dto;
     }
 
+    public async Task<bool> DeletePlayer(Guid gameId, Guid playerId, CancellationToken cancellationToken)
+    {
+        var game = await gamesRepository.Get(gameId, cancellationToken);
+        var player = game.Players.FirstOrDefault(p => p.Id == playerId);
+        if (player != null)
+        {
+            game.RemovePlayer(player);
+        }
+
+        if (await gamesRepository.Save(game, cancellationToken) == false)
+        {
+            throw new Exception("Failed to save game");
+        }
+
+        var dto = await SaveAndReturnDetails(game, cancellationToken);
+        await UpdateCache(dto);
+        await PlayerRemovedEvent(game.Code, playerId);
+        return true;
+    }
+
     public async Task<GameDetailsDto> Activate(Guid gameId, CancellationToken cancellationToken)
     {
         var alreadyHasActiveGame = await gamesRepository.HasActiveGame(cancellationToken);
