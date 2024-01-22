@@ -287,7 +287,7 @@ public class GamesService(
             game.Id,
             game.Code,
             game.State,
-            game.Players.Select(p => new GamePlayerDto(p.Id, p.DisplayName, p.EmailAddress, p.IsBanned)).ToList()
+            game.Players.Where(plyr=> !plyr.IsBanned).Select(p => new GamePlayerDto(p.Id, p.DisplayName, p.EmailAddress, p.IsBanned)).ToList()
         );
         return dto;
     }
