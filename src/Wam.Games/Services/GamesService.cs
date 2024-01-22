@@ -45,6 +45,21 @@ public class GamesService(
         logger.LogInformation("No upcoming game found, returning nothing");
         return null;
     }
+
+    public async Task<GameDetailsDto?> GetActive(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Getting upcoming game");
+        var game = await gamesRepository.GetActiveGame(cancellationToken);
+        if (game != null)
+        {
+            var dto = ToDto(game);
+            await UpdateCache(dto);
+            return dto;
+        }
+        logger.LogInformation("No active game found, returning nothing");
+        return null;
+    }
+
     public Task<GameDetailsDto> Get(Guid id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Getting game by id {id}, using the cache-aside pattern", id);

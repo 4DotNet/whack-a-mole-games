@@ -6,6 +6,7 @@ public interface IGamesService
 {
     Task<GameDetailsDto> Get(Guid id, CancellationToken cancellationToken);
     Task<GameDetailsDto?> GetUpcoming(CancellationToken cancellationToken);
+    Task<GameDetailsDto?> GetActive(CancellationToken cancellationToken);
     Task<GameDetailsDto> GetByCode(string code, CancellationToken cancellationToken);
     Task<GameDetailsDto> Create(CancellationToken cancellationToken);
     

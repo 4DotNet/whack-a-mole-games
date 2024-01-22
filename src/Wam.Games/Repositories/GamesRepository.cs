@@ -125,6 +125,32 @@ public class GamesRepository : IGamesRepository
         return null;
     }
 
+    public async Task<Game?> GetActiveGame(CancellationToken cancellationToken)
+    {
+        var query = _tableClient
+            .QueryAsync<GameEntity>(
+                $"{nameof(GameEntity.PartitionKey)} eq '{PartitionKey}' and ({nameof(GameEntity.State)} eq '{GameState.Current.Code}' or {nameof(GameEntity.State)} eq '{GameState.Started.Code}')");
+
+        await foreach (var queryPage in query.AsPages().WithCancellation(cancellationToken))
+        {
+            if (queryPage.Values.Any())
+            {
+                var entity = queryPage.Values.First();
+                var players = await GetGamePlayers(Guid.Parse(entity.RowKey), cancellationToken);
+
+                return new Game(Guid.Parse(entity.RowKey),
+                    entity.Code,
+                    entity.State,
+                    entity.CreatedOn,
+                    entity.StartedOn,
+                    entity.FinishedOn,
+                    players);
+            }
+        }
+
+        return null;
+    }
+
     public async Task<bool> HasActiveGame(CancellationToken cancellationToken)
     {
         var query = _tableClient
@@ -137,6 +163,8 @@ public class GamesRepository : IGamesRepository
 
         return false;
     }
+
+
 
     private async Task<GameEntity> GetFromTableStorage(Guid gameId, CancellationToken cancellationToken)
     {

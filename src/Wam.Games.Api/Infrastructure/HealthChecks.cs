@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Net.Http.Headers;
 
-namespace Wam.Api.Infrastructure;
+namespace Wam.Games.Api.Infrastructure;
 
 public static class HealthChecks
 {

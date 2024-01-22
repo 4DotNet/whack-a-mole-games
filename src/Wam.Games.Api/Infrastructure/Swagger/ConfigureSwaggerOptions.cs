@@ -2,7 +2,7 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 
-namespace Wam.Api.Infrastructure.Swagger;
+namespace Wam.Games.Api.Infrastructure.Swagger;
 
 public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerOptions>
 {

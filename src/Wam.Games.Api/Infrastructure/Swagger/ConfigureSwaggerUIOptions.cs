@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-namespace Wam.Api.Infrastructure.Swagger;
+namespace Wam.Games.Api.Infrastructure.Swagger;
 
 public class ConfigureSwaggerUIOptions : IConfigureNamedOptions<SwaggerUIOptions>
 {

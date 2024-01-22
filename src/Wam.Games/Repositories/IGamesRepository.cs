@@ -21,4 +21,6 @@ public interface IGamesRepository
     /// </summary>
     /// <returns></returns>
     Task<bool> HasActiveGame(CancellationToken cancellationToken);
+    Task<Game?> GetActiveGame(CancellationToken cancellationToken);
+
 }

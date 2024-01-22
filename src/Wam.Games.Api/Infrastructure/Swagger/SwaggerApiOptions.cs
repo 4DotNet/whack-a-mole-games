@@ -1,4 +1,4 @@
-﻿namespace Wam.Api.Infrastructure.Swagger;
+﻿namespace Wam.Games.Api.Infrastructure.Swagger;
 
 internal class SwaggerApiOptions
 {

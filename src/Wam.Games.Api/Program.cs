@@ -1,11 +1,12 @@
 using Polly.Extensions.Http;
 using Polly;
-using Wam.Api.Infrastructure;
-using Wam.Api.Infrastructure.Swagger;
 using Wam.Core.Configuration;
 using Wam.Core.ExtensionMethods;
 using Wam.Core.Identity;
 using Wam.Games;
+using Wam.Games.Api.Infrastructure;
+using Wam.Games.Api.Infrastructure.Swagger;
+using Wam.Games.ExtensionMethods;
 using Wam.Games.Services;
 
 var corsPolicyName = "DefaultCors";

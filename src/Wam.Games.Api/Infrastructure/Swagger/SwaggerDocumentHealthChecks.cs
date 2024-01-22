@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Wam.Api.Infrastructure.Swagger;
+namespace Wam.Games.Api.Infrastructure.Swagger;
 
 /// <summary>
 /// Generate Swagger docs for Health end-points.

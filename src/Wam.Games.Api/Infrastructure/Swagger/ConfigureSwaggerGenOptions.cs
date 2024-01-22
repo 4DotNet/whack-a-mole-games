@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Wam.Api.Infrastructure.Swagger;
+namespace Wam.Games.Api.Infrastructure.Swagger;
 
 internal class ConfigureSwaggerGenOptions : IConfigureNamedOptions<SwaggerGenOptions>
 {
