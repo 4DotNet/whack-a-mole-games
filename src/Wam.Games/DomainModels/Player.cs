@@ -17,6 +17,12 @@ public class Player : DomainModel<Guid>
         SetState(TrackingState.Modified);
     }
 
+    public void Ban()
+    {
+        IsBanned = true;
+        SetState(TrackingState.Modified);
+    }
+
     public Player(Guid id, string diplayName, string emailAddress, bool isBanned ) : base(id)
     {
         DisplayName = diplayName;

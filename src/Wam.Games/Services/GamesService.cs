@@ -1,4 +1,4 @@
-﻿using Azure.Core;
+using Azure.Core;
 using Azure.Messaging.WebPubSub;
 using HexMaster.RedisCache.Abstractions;
 using Microsoft.Extensions.Configuration;
@@ -157,7 +157,7 @@ public class GamesService(
         var player = game.Players.FirstOrDefault(p => p.Id == playerId);
         if (player != null)
         {
-            game.RemovePlayer(player);
+            game.BanPlayer(player);
         }
 
         if (await gamesRepository.Save(game, cancellationToken) == false)
@@ -287,7 +287,7 @@ public class GamesService(
             game.Id,
             game.Code,
             game.State,
-            game.Players.Select(p => new GamePlayerDto(p.Id, p.DisplayName, p.EmailAddress, p.IsBanned)).ToList()
+            game.Players.Where(plyr=> !plyr.IsBanned).Select(p => new GamePlayerDto(p.Id, p.DisplayName, p.EmailAddress, p.IsBanned)).ToList()
         );
         return dto;
     }
