@@ -46,6 +46,17 @@ public class Game : DomainModel<Guid>
         _players.Remove(player);
         SetState(TrackingState.Modified);
     }
+
+    public void BanPlayer(Player player)
+    {
+        if (!_players.Contains(player))
+        {
+            throw new InvalidOperationException("Player not found");
+        }
+
+        player.Ban();
+        SetState(TrackingState.Modified);
+    }
     private void ChangeState(GameState value)
     {
         if (State.CanChangeTo(value))

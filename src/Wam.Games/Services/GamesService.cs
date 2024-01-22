@@ -157,7 +157,7 @@ public class GamesService(
         var player = game.Players.FirstOrDefault(p => p.Id == playerId);
         if (player != null)
         {
-            game.RemovePlayer(player);
+            game.BanPlayer(player);
         }
 
         if (await gamesRepository.Save(game, cancellationToken) == false)
