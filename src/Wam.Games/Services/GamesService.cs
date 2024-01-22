@@ -1,4 +1,4 @@
-﻿using Azure.Core;
+using Azure.Core;
 using Azure.Messaging.WebPubSub;
 using HexMaster.RedisCache.Abstractions;
 using Microsoft.Extensions.Configuration;
