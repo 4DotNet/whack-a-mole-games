@@ -9,6 +9,7 @@ param acrLoginServer string
 param acrUsername string
 @secure()
 param acrPassword string
+param corsHostnames array
 
 param containerPort int = 8080
 param containerAppName string = 'wam-games-api'
@@ -59,7 +60,7 @@ module serviceNameConfigurationValue 'configuration-value.bicep' = {
   }
 }
 
-resource apiContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource apiContainerApp 'Microsoft.App/containerApps@2023-08-01-preview' = {
   name: '${defaultResourceName}-aca'
   location: location
   identity: {
@@ -70,8 +71,9 @@ resource apiContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
 
     configuration: {
       activeRevisionsMode: 'Single'
+
       ingress: {
-        external: true
+        external: false
         targetPort: containerPort
         transport: 'auto'
         allowInsecure: false
@@ -81,6 +83,13 @@ resource apiContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             latestRevision: true
           }
         ]
+        corsPolicy: {
+          allowedOrigins: corsHostnames
+          allowCredentials: true
+          allowedHeaders: [ '*' ]
+          allowedMethods: [ '*' ]
+          maxAge: 0
+        }
       }
       dapr: {
         enabled: true

@@ -12,3 +12,11 @@ param integrationEnvironment = {
 param acrLoginServer = ''
 param acrPassword = ''
 param acrUsername = ''
+param corsHostnames = [
+  'https://wam.hexmaster.nl'
+  'https://wadmin.hexmaster.nl'
+  'https://wam-test.hexmaster.nl'
+  'https://wadmin-test.hexmaster.nl'
+  'https://mango-river-0dd954b03.4.azurestaticapps.net'
+  'http://localhost:4200'
+]
