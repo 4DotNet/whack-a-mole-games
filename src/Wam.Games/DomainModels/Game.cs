@@ -33,6 +33,12 @@ public class Game : DomainModel<Guid>
                 "The maximum amount of players is reached, no new players can join at this time");
         }
 
+        if (State != GameState.New && State != GameState.Current)
+        {
+            throw new WamGameException(WamGameErrorCode.InvalidState,
+                "Cannot add players to a game of an active state");
+        }
+
         _players.Add(player);
         SetState(TrackingState.Modified);
     }

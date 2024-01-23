@@ -41,7 +41,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: corsPolicyName,
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200", "https://app.tinylnk.nl")
+            policy.WithOrigins("https://wam.hexmaster.nl",
+                    "https://wadmin.hexmaster.nl",
+                    "https://wam-test.hexmaster.nl",
+                    "https://wadmin-test.hexmaster.nl",
+                    "https://mango-river-0dd954b03.4.azurestaticapps.net",
+                    "http://localhost:4200")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
