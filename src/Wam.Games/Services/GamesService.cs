@@ -228,7 +228,7 @@ public class GamesService(
     {
         var message = new RealtimeEvent<GamePlayerDto>
         {
-            Message = "PlayerAdded",
+            Message = "game-player-added",
             Data = new GamePlayerDto(player.Id, player.DisplayName, player.EmailAddress, player.IsBanned)
         };
         return RaiseEvent(message, code);
@@ -237,7 +237,7 @@ public class GamesService(
     {
         var message = new RealtimeEvent<GamePlayerDto>
         {
-            Message = "PlayerRemoved",
+            Message = "game-player-removed",
             Data = new GamePlayerDto(playerId, string.Empty, string.Empty, false)
         };
         return RaiseEvent(message, code);
@@ -246,8 +246,13 @@ public class GamesService(
     {
         var message = new RealtimeEvent<GameStateChangedDto>
         {
-            Message = "GameStarted",
-            Data = new GameStateChangedDto(game.Id, game.Code, game.State.Code, game.CreatedOn, game.StartedOn,
+            Message = "game-state-changed",
+            Data = new GameStateChangedDto(
+                game.Id,
+                game.Code,
+                game.State,
+                game.CreatedOn,
+                game.StartedOn,
                 game.FinishedOn)
         };
         return RaiseEvent(message, game.Code);

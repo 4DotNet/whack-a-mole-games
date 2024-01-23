@@ -1,9 +1,11 @@
-﻿namespace Wam.Games.DataTransferObjects;
+﻿using Wam.Core.Enums;
+
+namespace Wam.Games.DataTransferObjects;
 
 public record GameStateChangedDto(
     Guid Id,
     string Code,
-    string State,
+    GameState State,
     DateTimeOffset CreatedOn,
     DateTimeOffset? StartedOn,
     DateTimeOffset? FinishedOn);
