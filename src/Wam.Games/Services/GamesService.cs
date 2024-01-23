@@ -8,6 +8,7 @@ using Wam.Core.Events;
 using Wam.Games.DataTransferObjects;
 using Wam.Games.DomainModels;
 using Wam.Games.ErrorCodes;
+using Wam.Games.EventData;
 using Wam.Games.Exceptions;
 using Wam.Games.Repositories;
 
@@ -226,19 +227,19 @@ public class GamesService(
 
     private Task PlayerAddedEvent(string code, Player player)
     {
-        var message = new RealtimeEvent<GamePlayerDto>
+        var message = new RealtimeEvent<GamePlayerJoinedDto>
         {
             Message = "game-player-added",
-            Data = new GamePlayerDto(player.Id, player.DisplayName, player.EmailAddress, player.IsBanned)
+            Data = new GamePlayerJoinedDto(code, player.Id, player.DisplayName, player.EmailAddress)
         };
         return RaiseEvent(message, code);
     }
     private Task PlayerRemovedEvent(string code, Guid playerId)
     {
-        var message = new RealtimeEvent<GamePlayerDto>
+        var message = new RealtimeEvent<GamePlayerLeftDto>
         {
             Message = "game-player-removed",
-            Data = new GamePlayerDto(playerId, string.Empty, string.Empty, false)
+            Data = new GamePlayerLeftDto(code, playerId)
         };
         return RaiseEvent(message, code);
     }
