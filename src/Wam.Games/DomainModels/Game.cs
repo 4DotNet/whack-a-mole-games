@@ -98,7 +98,7 @@ public class Game : DomainModel<Guid>
 
     public void Finish()
     {
-        ChangeState(GameState.Started);
+        ChangeState(GameState.Finished);
     }
 
     public void Cancel()
