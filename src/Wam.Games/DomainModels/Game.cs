@@ -67,6 +67,15 @@ public class Game : DomainModel<Guid>
     {
         if (State.CanChangeTo(value))
         {
+            if (value == GameState.Finished && FinishedOn.HasValue)
+            {
+                if (FinishedOn.Value > DateTimeOffset.UtcNow)
+                {
+                    throw new WamGameException(WamGameErrorCode.InvalidState,
+                                               $"The game cannot be finished in the future");
+                }
+            }
+
             State = value;
             if (value == GameState.Started)
             {
