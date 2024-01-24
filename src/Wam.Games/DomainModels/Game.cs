@@ -71,7 +71,7 @@ public class Game : DomainModel<Guid>
             if (value == GameState.Started)
             {
                 StartedOn = DateTimeOffset.UtcNow;
-                FinishedOn = DateTimeOffset.UtcNow;
+                FinishedOn = DateTimeOffset.UtcNow.AddSeconds(40);
             }
             if (value == GameState.Cancelled)
             {
