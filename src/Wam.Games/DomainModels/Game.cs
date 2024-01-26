@@ -72,7 +72,7 @@ public class Game : DomainModel<Guid>
                 if (FinishedOn.Value > DateTimeOffset.UtcNow)
                 {
                     throw new WamGameException(WamGameErrorCode.InvalidState,
-                                               $"The game cannot be finished in the future");
+                        $"The game cannot be finished in the future");
                 }
             }
 
