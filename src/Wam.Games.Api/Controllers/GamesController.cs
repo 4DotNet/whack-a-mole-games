@@ -111,9 +111,8 @@ public class GamesController(IGamesService gamesService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> Join(string code, [FromQuery]string?  voucher, CancellationToken cancellationToken)
     {
-        //var userIdString = HttpContext.Request.Headers["x-user-id"];
-        //var userId = Guid.Parse(userIdString);
-        var userId = Guid.NewGuid();
+        var userIdString = HttpContext.Request.Headers["x-user-id"];
+        var userId = Guid.Parse(userIdString);
         var response = await gamesService.Join(code, userId, voucher, cancellationToken);
         return Ok(response);
     }
