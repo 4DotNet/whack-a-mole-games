@@ -5,13 +5,14 @@ namespace Wam.Games.ErrorCodes;
 public abstract class WamGameErrorCode : WamErrorCode
 {
     public static WamGameErrorCode GameNotFound => new GameNotFound();
-    public static WamGameErrorCode GameIsFull => new GameNotFound();
-    public static WamGameErrorCode InvalidState => new GameNotFound();
-    public static WamGameErrorCode InvalidPlayer => new GameNotFound();
-    public static WamGameErrorCode NewGameAlreadyExists => new GameNotFound();
-    public static WamGameErrorCode ActiveGameAlreadyExists => new GameNotFound();
-    public static WamGameErrorCode InvalidGameVoucher => new GameNotFound();
+    public static WamGameErrorCode GameIsFull => new GameIsFull();
+    public static WamGameErrorCode InvalidState => new InvalidState();
+    public static WamGameErrorCode InvalidPlayer => new InvalidPlayer();
+    public static WamGameErrorCode NewGameAlreadyExists => new NewGameAlreadyExists();
+    public static WamGameErrorCode ActiveGameAlreadyExists => new ActiveGameAlreadyExists();
+    public static WamGameErrorCode InvalidGameVoucher => new InvalidGameVoucher();
     public static WamGameErrorCode PlayerNotFound => new PlayerNotFound();
+    public static WamGameErrorCode InvalidGameCode => new InvalidGameCode();
 
     public override string Namespace => $"{base.Namespace}.Games";
 }
@@ -55,4 +56,9 @@ public class InvalidGameVoucher : WamGameErrorCode
 public class PlayerNotFound : WamGameErrorCode
 {
     public override string Code => nameof(PlayerNotFound);
+}
+
+public class InvalidGameCode : WamGameErrorCode
+{
+    public override string Code => nameof(InvalidGameCode);
 }

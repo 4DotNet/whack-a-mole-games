@@ -10,6 +10,7 @@ using Wam.Games.DomainModels;
 using Wam.Games.ErrorCodes;
 using Wam.Games.EventData;
 using Wam.Games.Exceptions;
+using Wam.Games.ExtensionMethods;
 using Wam.Games.Repositories;
 
 namespace Wam.Games.Services;
@@ -64,14 +65,14 @@ public class GamesService(
     public Task<GameDetailsDto> Get(Guid id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Getting game by id {id}, using the cache-aside pattern", id);
-        var cacheKey = $"wam:game:id:{id}";
+        var cacheKey = CacheName.GameDetails(id);
         var cacheClient = cacheClientFactory.CreateClient();
         return cacheClient.GetOrInitializeAsync(() => GetFromRepositoryById(id, cancellationToken), cacheKey);
     }
     public Task<GameDetailsDto> GetByCode(string code, CancellationToken cancellationToken)
     {
         logger.LogInformation("Getting game by code {code}, using the cache-aside pattern", code);
-        var cacheKey = $"wam:game:code:{code}";
+        var cacheKey = CacheName.GameDetails(code);
         var cacheClient = cacheClientFactory.CreateClient();
         return cacheClient.GetOrInitializeAsync(() => GetFromRepositoryByCode(code, cancellationToken), cacheKey);
     }
@@ -90,6 +91,9 @@ public class GamesService(
     }
     public async Task<GameDetailsDto> Join(string code, Guid userId, string? voucher, CancellationToken cancellationToken)
     {
+        // Throws exception when game code is invalid
+        code = code.ValidateGameCode();
+
         logger.LogInformation("Joining game {code} as user {userId}", code, userId);
         var game = await gamesRepository.GetByCode(code, cancellationToken);
         if (game.Players.Any(plyr => plyr.Id == userId))

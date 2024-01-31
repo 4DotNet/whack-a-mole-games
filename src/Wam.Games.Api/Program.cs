@@ -2,8 +2,8 @@ using Polly.Extensions.Http;
 using Polly;
 using Wam.Core.Configuration;
 using Wam.Core.ExtensionMethods;
+using Wam.Core.Filters;
 using Wam.Core.Identity;
-using Wam.Games;
 using Wam.Games.Api.Infrastructure;
 using Wam.Games.Api.Infrastructure.Swagger;
 using Wam.Games.ExtensionMethods;
@@ -53,9 +53,9 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers(options => options.Filters.Add(new WamExceptionFilter())).AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwagger("Whack-A-Mole Users API", enableSwagger: !builder.Environment.IsProduction());
+builder.Services.AddSwagger("Whack-A-Mole Games API", enableSwagger: !builder.Environment.IsProduction());
 
 var app = builder.Build();
 
