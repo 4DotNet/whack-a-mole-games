@@ -117,4 +117,14 @@ public class GamesController(IGamesService gamesService) : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
+    [HttpGet("health")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> Health(CancellationToken cancellationToken)
+    {
+        var nextGame = await gamesService.GetActive(cancellationToken);
+        return Ok(nextGame);
+    }
+
+
 }
