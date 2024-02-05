@@ -3,6 +3,7 @@ using Azure.Messaging.WebPubSub;
 using HexMaster.RedisCache.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 using Wam.Core.Cache;
 using Wam.Core.Events;
 using Wam.Games.DataTransferObjects;
@@ -76,6 +77,7 @@ public class GamesService(
         var cacheClient = cacheClientFactory.CreateClient();
         return cacheClient.GetOrInitializeAsync(() => GetFromRepositoryByCode(code, cancellationToken), cacheKey);
     }
+
     public async Task<GameDetailsDto> Create(CancellationToken cancellationToken)
     {
         logger.LogInformation("Creating new game");
@@ -87,8 +89,11 @@ public class GamesService(
         }
 
         var game = new Game();
-        return await SaveAndReturnDetails(game, cancellationToken);
+        var dto = await SaveAndReturnDetails(game, cancellationToken);
+        await NewGameCreated(dto);
+        return dto;
     }
+
     public async Task<GameDetailsDto> Join(string code, Guid userId, string? voucher, CancellationToken cancellationToken)
     {
         // Throws exception when game code is invalid
@@ -198,6 +203,8 @@ public class GamesService(
         game.Activate();
         var dto = await SaveAndReturnDetails(game, cancellationToken);
         await GameStateChangedEvent(game);
+        await GameBecameActive(dto);
+
         return dto;
     }
     public async Task<GameDetailsDto> Start(Guid gameId, CancellationToken cancellationToken)
@@ -262,6 +269,26 @@ public class GamesService(
         };
         return RaiseEvent(message, game.Code);
     }
+
+    private Task GameBecameActive(GameDetailsDto game)
+    {
+        var message = new RealtimeEvent<GameDetailsDto>
+        {
+            Message = "game-became-active",
+            Data = game
+        };
+        return RaiseEvent(message, "dashboard");
+    }
+    private Task NewGameCreated(GameDetailsDto game)
+    {
+        var message = new RealtimeEvent<GameDetailsDto>
+        {
+            Message = "new-game-created",
+            Data = game
+        };
+        return RaiseEvent(message, "dashboard");
+    }
+
 
     private async Task RaiseEvent<T>(RealtimeEvent<T> realtimeEvent, string group)
     {
