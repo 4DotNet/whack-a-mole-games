@@ -33,7 +33,7 @@ builder.Services.AddHttpClient<IUsersService, UsersService>()
 
 
 builder.Services
-    .AddWamCoreConfiguration(builder.Configuration)
+    .AddWamCoreConfiguration(builder.Configuration, daprAppId: nameof(ServicesConfiguration.GamesService))
     .AddWamGamesModule();
 
 builder.Services.AddCors(options =>
@@ -64,6 +64,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
 }
 
 app.UseAuthentication();
