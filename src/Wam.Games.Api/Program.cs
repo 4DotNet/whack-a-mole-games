@@ -24,7 +24,7 @@ try
 }
 catch (Exception ex)
 {
-    throw new Exception("Failed to configure the Whack-A-Mole Users service, Azure App Configuration failed", ex);
+    throw new Exception("Failed to configure the Whack-A-Mole Games service, Azure App Configuration failed", ex);
 }
 // Add services to the container.
 

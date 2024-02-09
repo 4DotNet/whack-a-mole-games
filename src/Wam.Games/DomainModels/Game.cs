@@ -4,6 +4,7 @@ using Wam.Core.Enums;
 using Wam.Core.ExtensionMethods;
 using Wam.Games.ErrorCodes;
 using Wam.Games.Exceptions;
+using StringExtensions = Wam.Core.ExtensionMethods.StringExtensions;
 
 namespace Wam.Games.DomainModels;
 

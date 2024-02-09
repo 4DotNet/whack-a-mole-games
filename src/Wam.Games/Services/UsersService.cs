@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using Dapr.Client;
+﻿using Dapr.Client;
 using HexMaster.RedisCache.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
