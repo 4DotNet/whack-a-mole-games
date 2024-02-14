@@ -1,5 +1,4 @@
 ﻿using Dapr.Client;
-using HexMaster.RedisCache.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -12,11 +11,9 @@ namespace Wam.Games.Services;
 public class UsersService : IUsersService
 {
     private readonly HttpClient _httpClient;
-    private readonly IOptions<ServicesConfiguration> _servicesConfiguration;
-    private readonly ICacheClientFactory _cacheClientFactory;
     private readonly ILogger<UsersService> _logger;
     private readonly DaprClient _dapr;
-    private readonly string _remoteServiceBaseUrl;
+    private readonly Lazy<string> RemoteServiceUrl;
     private const string StateStoreName = "statestore";
 
     public Task<PlayerDetailsDto?> GetPlayerDetails(Guid userId, CancellationToken cancellationToken)
@@ -30,7 +27,7 @@ public class UsersService : IUsersService
         try
         {
             _logger.LogInformation("Make a user ban request to the users API {userId}", userId);
-            var uri = $"{_remoteServiceBaseUrl}/Users/{userId}/Ban";
+            var uri = $"{RemoteServiceUrl.Value}/Users/{userId}/Ban";
             _logger.LogInformation("Making request to {userDetailsUrl}", uri);
             var responseString = await _httpClient.GetStringAsync(uri, cancellationToken);
             return JsonConvert.DeserializeObject<PlayerDetailsDto>(responseString);
@@ -57,29 +54,26 @@ public class UsersService : IUsersService
     private async Task<PlayerDetailsDto?> GetPlayerDetailsFromRemoteServer(Guid userId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Downloading user information from users service for user {userId}", userId);
-        var uri = $"{_remoteServiceBaseUrl}/users/{userId}";
+        var uri = $"{RemoteServiceUrl.Value}/users/{userId}";
         _logger.LogInformation("Downloading from {userDetailsUrl}", uri);
         var responseString = await _httpClient.GetStringAsync(uri, cancellationToken);
         return JsonConvert.DeserializeObject<PlayerDetailsDto>(responseString);
     }
 
-    private string RemoteServiceBaseUrl()
+    private static string RemoteServiceBaseUrl(IOptions<ServicesConfiguration> configuration)
     {
-        return $"http://{_servicesConfiguration.Value.UsersService}/api";
+        return $"http://{configuration.Value.UsersService}/api";
     }
 
     public UsersService(
         HttpClient httpClient, 
         IOptions<ServicesConfiguration> servicesConfiguration,
-        ICacheClientFactory cacheClientFactory,
         ILogger<UsersService> logger,
         DaprClient dapr)
     {
         _httpClient = httpClient;
-        _servicesConfiguration = servicesConfiguration;
-        _cacheClientFactory = cacheClientFactory;
         _logger = logger;
         _dapr = dapr;
-        _remoteServiceBaseUrl = RemoteServiceBaseUrl();
+            RemoteServiceUrl = new Lazy<string>(() => RemoteServiceBaseUrl(servicesConfiguration));
     }
 }
