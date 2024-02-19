@@ -1,9 +1,11 @@
+using System.Collections.ObjectModel;
 using Azure.Core;
 using Azure.Messaging.WebPubSub;
 using HexMaster.RedisCache.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using Dapr.Client;
 using Wam.Core.Cache;
 using Wam.Core.Events;
 using Wam.Games.DataTransferObjects;
@@ -28,12 +30,15 @@ namespace Wam.Games.Services;
 /// <param name="logger">A logger to log stuff and track problems</param>
 public class GamesService(
     IGamesRepository gamesRepository,
-    ICacheClientFactory cacheClientFactory,
+    DaprClient daprClient,
     IUsersService usersService,
     IConfiguration configuration,
     WebPubSubServiceClient pubsubClient,
     ILogger<GamesService> logger) : IGamesService
 {
+
+    private const string StateStoreName = "statestore";
+
 
     public async Task<GameDetailsDto?> GetUpcoming(CancellationToken cancellationToken)
     {
@@ -42,7 +47,7 @@ public class GamesService(
         if (game != null)
         {
             var dto = ToDto(game);
-            await UpdateCache(dto);
+            await UpdateCache(dto, cancellationToken);
             return dto;
         }
         logger.LogInformation("No upcoming game found, returning nothing");
@@ -56,26 +61,42 @@ public class GamesService(
         if (game != null)
         {
             var dto = ToDto(game);
-            await UpdateCache(dto);
+            await UpdateCache(dto, cancellationToken);
             return dto;
         }
         logger.LogInformation("No active game found, returning nothing");
         return null;
     }
 
-    public Task<GameDetailsDto> Get(Guid id, CancellationToken cancellationToken)
+    public async Task<GameDetailsDto> Get(Guid id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Getting game by id {id}, using the cache-aside pattern", id);
         var cacheKey = CacheName.GameDetails(id);
-        var cacheClient = cacheClientFactory.CreateClient();
-        return cacheClient.GetOrInitializeAsync(() => GetFromRepositoryById(id, cancellationToken), cacheKey);
+        var cacheValue = await daprClient.GetStateEntryAsync<GameDetailsDto>(StateStoreName, cacheKey, cancellationToken: cancellationToken);
+        if (cacheValue.Value != null)
+        {
+            return cacheValue.Value;
+        }
+        var dbValue = await GetFromRepositoryById(id, cancellationToken);
+        await UpdateCache(dbValue, cancellationToken);
+        return dbValue;
     }
-    public Task<GameDetailsDto> GetByCode(string code, CancellationToken cancellationToken)
+
+    public async Task<GameDetailsDto> GetByCode(string code, CancellationToken cancellationToken)
     {
         logger.LogInformation("Getting game by code {code}, using the cache-aside pattern", code);
         var cacheKey = CacheName.GameDetails(code);
-        var cacheClient = cacheClientFactory.CreateClient();
-        return cacheClient.GetOrInitializeAsync(() => GetFromRepositoryByCode(code, cancellationToken), cacheKey);
+        var cacheValue =
+            await daprClient.GetStateEntryAsync<GameDetailsDto>(StateStoreName, cacheKey,
+                cancellationToken: cancellationToken);
+        if (cacheValue.Value != null)
+        {
+            return cacheValue.Value;
+        }
+
+        var dbValue = await GetFromRepositoryByCode(code, cancellationToken);
+        await UpdateCache(dbValue, cancellationToken);
+        return dbValue;
     }
 
     public async Task<GameDetailsDto> Create(CancellationToken cancellationToken)
@@ -175,8 +196,7 @@ public class GamesService(
             throw new Exception("Failed to save game");
         }
 
-        var dto = await SaveAndReturnDetails(game, cancellationToken);
-        await UpdateCache(dto);
+        await SaveAndReturnDetails(game, cancellationToken);
         try
         {
             await PlayerRemovedEvent(game.Code, playerId);
@@ -309,7 +329,7 @@ public class GamesService(
         }
 
         var dto = ToDto(game);
-        await UpdateCache(dto);
+        await UpdateCache(dto, cancellationToken);
         return dto;
     }
 
@@ -340,15 +360,25 @@ public class GamesService(
         return dto;
     }
 
-    private async Task UpdateCache(GameDetailsDto dto)
+    private async Task UpdateCache(GameDetailsDto dto, CancellationToken cancellationToken)
     {
         try
         {
             var cacheKeyById = CacheName.GameDetails(dto.Id);
             var cacheKeyByCode = CacheName.GameDetails(dto.Code);
-            var cacheClient = cacheClientFactory.CreateClient();
-            await cacheClient.SetAsAsync(cacheKeyById, dto);
-            await cacheClient.SetAsAsync(cacheKeyByCode, dto);
+            await daprClient.SaveStateAsync(
+                StateStoreName, 
+                cacheKeyById, 
+                dto,
+                metadata: new Dictionary<string, string>
+                {
+                    {
+                        "ttlInSeconds", "900"
+                    }
+                },
+
+                cancellationToken: cancellationToken);
+            await daprClient.SaveStateAsync(StateStoreName, cacheKeyByCode, dto, cancellationToken: cancellationToken);
         }
         catch (Exception e)
         {
