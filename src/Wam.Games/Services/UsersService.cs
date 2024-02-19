@@ -22,23 +22,6 @@ public class UsersService : IUsersService
         return GetUserFromStateOrService(userId, cancellationToken);
     }
 
-    public async Task<PlayerDetailsDto?> BanUser(Guid userId, CancellationToken cancellationToken)
-    {
-        try
-        {
-            _logger.LogInformation("Make a user ban request to the users API {userId}", userId);
-            var uri = $"{RemoteServiceUrl.Value}/Users/{userId}/Ban";
-            _logger.LogInformation("Making request to {userDetailsUrl}", uri);
-            var responseString = await _httpClient.GetStringAsync(uri, cancellationToken);
-            return JsonConvert.DeserializeObject<PlayerDetailsDto>(responseString);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while making a user ban request to the users API {userId}", userId);
-            throw;
-        }
-    }
-
     private async Task<PlayerDetailsDto?> GetUserFromStateOrService(Guid userId, CancellationToken cancellationToken)
     {
         var cacheKey = CacheName.UserDetails(userId);

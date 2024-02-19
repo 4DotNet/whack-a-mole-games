@@ -179,7 +179,6 @@ public class GamesService(
         await UpdateCache(dto);
         try
         {
-            await usersService.BanUser(playerId, cancellationToken);
             await PlayerRemovedEvent(game.Code, playerId);
         }
         catch (Exception ex)
