@@ -1,5 +1,3 @@
-using Polly.Extensions.Http;
-using Polly;
 using Wam.Core.Configuration;
 using Wam.Core.ExtensionMethods;
 using Wam.Core.Filters;
@@ -31,9 +29,8 @@ catch (Exception ex)
 builder.Services.AddHttpClient<IUsersService, UsersService>()
     .AddStandardResilienceHandler();
 
-
 builder.Services
-    .AddWamCoreConfiguration(builder.Configuration, daprAppId: nameof(ServicesConfiguration.GamesService))
+    .AddWamCoreConfiguration(builder.Configuration, false, nameof(ServicesConfiguration.GamesService))
     .AddWamGamesModule();
 
 builder.Services.AddCors(options =>
@@ -54,8 +51,9 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers(options => options.Filters.Add(new WamExceptionFilter())).AddNewtonsoftJson();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwagger("Whack-A-Mole Games API", enableSwagger: !builder.Environment.IsProduction());
+builder.Services.AddEndpointsApiExplorer()
+    .AddSwagger("Whack-A-Mole Games API")
+    .AddAzureAdAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
@@ -78,19 +76,3 @@ app.MapControllers();
 Console.WriteLine("Starting...");
 app.Run();
 Console.WriteLine("Stopped");
-
-static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
-{
-    return HttpPolicyExtensions
-        .HandleTransientHttpError()
-        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-        .WaitAndRetryAsync(4, retryAttempt => TimeSpan.FromSeconds(2));
-}
-
-static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
-{
-    return HttpPolicyExtensions
-        .HandleTransientHttpError()
-        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-        .CircuitBreakerAsync(3, TimeSpan.FromSeconds(11));
-}
