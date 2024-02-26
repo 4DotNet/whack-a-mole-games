@@ -1,9 +1,9 @@
+using Wam.Core.Authentication;
+using Wam.Core.Authentication.Swagger;
 using Wam.Core.Configuration;
 using Wam.Core.ExtensionMethods;
 using Wam.Core.Filters;
 using Wam.Core.Identity;
-using Wam.Games.Api.Infrastructure;
-using Wam.Games.Api.Infrastructure.Swagger;
 using Wam.Games.ExtensionMethods;
 using Wam.Games.Services;
 
