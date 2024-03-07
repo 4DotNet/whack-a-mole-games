@@ -28,11 +28,11 @@ public class Game : DomainModel<Guid>
             throw new InvalidOperationException("Player already added");
         }
 
-        if (_players.Count >= 25)
-        {
-            throw new WamGameException(WamGameErrorCode.GameIsFull,
-                "The maximum amount of players is reached, no new players can join at this time");
-        }
+        //if (_players.Count >= 25)
+        //{
+        //    throw new WamGameException(WamGameErrorCode.GameIsFull,
+        //        "The maximum amount of players is reached, no new players can join at this time");
+        //}
 
         if (State != GameState.New && State != GameState.Current)
         {
