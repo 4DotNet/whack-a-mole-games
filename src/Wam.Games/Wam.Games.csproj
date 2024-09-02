@@ -7,14 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.8.3" />
-    <PackageReference Include="Azure.Messaging.WebPubSub" Version="1.3.0" />
-    <PackageReference Include="Dapr.AspNetCore" Version="1.12.0" />
+    <PackageReference Include="Azure.Data.Tables" Version="12.9.0" />
+    <PackageReference Include="Azure.Messaging.WebPubSub" Version="1.4.0" />
+    <PackageReference Include="Dapr.AspNetCore" Version="1.14.0" />
     <PackageReference Include="HexMaster.DomainDrivenDesign" Version="2.0.5" />
     <PackageReference Include="Man.Dapr.Sidekick" Version="1.2.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Wam.Core" Version="0.2.2" />
+    <PackageReference Include="Wam.Core" Version="0.2.3" />
   </ItemGroup>
 
   <ItemGroup>
