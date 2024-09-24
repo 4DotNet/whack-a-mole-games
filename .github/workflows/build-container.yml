@@ -24,16 +24,16 @@ jobs:
       semver: ${{ steps.gitversion.outputs.SemVer }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.15
+        uses: gittools/actions/gitversion/setup@v1.1.1
         with:
           versionSpec: "5.x"
       - name: Determine Version
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v0.9.15
+        uses: gittools/actions/gitversion/execute@v1.1.1
         with:
           useConfigFile: true
 
@@ -42,14 +42,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: versionize
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build container images
         working-directory: src
         run: |
           docker build . --file Dockerfile --tag ${{ secrets.ACR_LOGIN_SERVER }}/$IMAGE_NAME:${{needs.versionize.outputs.semver}}
           docker build . --file Dockerfile --tag ${{ secrets.ACR_LOGIN_SERVER }}/$IMAGE_NAME:latest
       - name: Login to ACR
-        uses: azure/docker-login@v1
+        uses: azure/docker-login@v2
         with:
           login-server: ${{ secrets.ACR_LOGIN_SERVER }}
           username: ${{ secrets.ACR_USERNAME }}
@@ -64,14 +64,14 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Transpile Infra
         working-directory: infrastructure
         run: |
           bicep build-params test.main.bicepparam
           az bicep build --file main.bicep
       - name: Publish Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bicep-templates
           path: infrastructure/*.json
@@ -82,11 +82,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Download Artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: bicep-templates
           path: ./infrastructure
