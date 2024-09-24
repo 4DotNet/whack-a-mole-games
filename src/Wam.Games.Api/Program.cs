@@ -17,7 +17,10 @@ try
     {
         var appConfigurationUrl = builder.Configuration.GetRequiredValue("AzureAppConfiguration");
         options.Connect(new Uri(appConfigurationUrl), azureCredential)
-            .UseFeatureFlags();
+            .UseFeatureFlags(ffOpts =>
+            {
+                ffOpts.CacheExpirationInterval = TimeSpan.FromMinutes(5);
+            });
     });
 }
 catch (Exception ex)

@@ -3,6 +3,8 @@ using Azure.Messaging.WebPubSub;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Dapr.Client;
+using Microsoft.Extensions.Options;
+using Microsoft.FeatureManagement;
 using Wam.Core.Cache;
 using Wam.Core.Events;
 using Wam.Games.DataTransferObjects;
@@ -12,6 +14,9 @@ using Wam.Games.EventData;
 using Wam.Games.Exceptions;
 using Wam.Games.ExtensionMethods;
 using Wam.Games.Repositories;
+using Wam.Core.Configuration;
+using Microsoft.AspNetCore.Http;
+using Wam.Core.Enums;
 
 namespace Wam.Games.Services;
 
@@ -31,7 +36,9 @@ public class GamesService(
     IUsersService usersService,
     IConfiguration configuration,
     WebPubSubServiceClient pubsubClient,
-    ILogger<GamesService> logger) : IGamesService
+    IFeatureManager featureManager,
+    IOptions<ServicesConfiguration> servicesConfiguration,
+ILogger<GamesService> logger) : IGamesService
 {
 
     private const string StateStoreName = "statestore";
@@ -125,10 +132,10 @@ public class GamesService(
             return ToDto(game);
         }
 
-        var useVouchers = false;
-        if (bool.TryParse(configuration["EnableVouchers"], out bool value))
+        if (await featureManager.IsEnabledAsync(FeatureName.EnableMaxPlayersFeature) && game.Players.Count >= 25)
         {
-            useVouchers = value;
+            throw new WamGameException(WamGameErrorCode.GameIsFull,
+                "The game is full, no more players can join");
         }
 
         var userDetails = await usersService.GetPlayerDetails(userId, cancellationToken);
@@ -138,24 +145,24 @@ public class GamesService(
                                $"The player with id {userId} was not found in the system");
         }
         var playerModel = new Player(userDetails.Id, userDetails.DisplayName, userDetails.EmailAddress, userDetails.IsExcluded);
-        //if (useVouchers)
-        //{
-        //    logger.LogInformation("Vouchers are enabled, validating voucher {voucher}", voucher);
-        //    if (!string.IsNullOrWhiteSpace(voucher))
-        //    {
-        //        // Implement validation and usage of a voucher
-
-        //        playerModel.SetVoucher(voucher);
-        //    }
-        //    else
-        //    {
-        //        throw new WamGameException(WamGameErrorCode.InvalidGameVoucher,
-        //            "This game needs a voucher to join, the voucher passed is null or an empty string");
-        //    }
-        //}
-
+        if (await featureManager.IsEnabledAsync(FeatureName.EnableVouchersFeature))
+        {
+            if (string.IsNullOrWhiteSpace(voucher) || !Guid.TryParse(voucher, out Guid voucherId))
+            {
+                throw new WamGameException(WamGameErrorCode.InvalidGameVoucher,
+                    "Player passed no voucher or an invalid voucher code");
+            }
+            var vouchersApiAppId = servicesConfiguration.Value.VouchersService ?? "wam-vouchers-api";
+            var httpRequest = daprClient.CreateInvokeMethodRequest(HttpMethod.Put, vouchersApiAppId, $"api/{voucherId}/claim/{playerModel.Id}");
+            var response = await daprClient.InvokeMethodWithResponseAsync(httpRequest, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new WamGameException(WamGameErrorCode.InvalidGameVoucher,
+                    "!Invalid voucher! Voucher code not found or already used.");
+            }
+            playerModel.SetVoucher(voucherId.ToString());
+        }
         game.AddPlayer(playerModel);
-
         var dto = await SaveAndReturnDetails(game, cancellationToken);
         await PlayerAddedEvent(code, playerModel);
         return dto;
