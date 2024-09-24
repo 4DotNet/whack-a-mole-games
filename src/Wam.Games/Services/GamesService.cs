@@ -259,6 +259,13 @@ ILogger<GamesService> logger) : IGamesService
 
     }
 
+    public async Task<GameConfigurationResponse> GetConfiguration(CancellationToken httpContextRequestAborted)
+    {
+        var enableVouchers = await featureManager.IsEnabledAsync(FeatureName.EnableVouchersFeature);
+        var enableMaxPlayers = await featureManager.IsEnabledAsync(FeatureName.EnableMaxPlayersFeature);
+        return new GameConfigurationResponse(enableVouchers, enableMaxPlayers);
+    }
+
     private Task PlayerAddedEvent(string code, Player player)
     {
         var message = new RealtimeEvent<GamePlayerJoinedDto>

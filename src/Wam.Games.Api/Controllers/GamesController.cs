@@ -10,6 +10,20 @@ public class GamesController(IGamesService gamesService) : ControllerBase
 {
 
     [AllowAnonymous]
+    [HttpGet("configuration")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Configuration()
+    {
+        var nextGame = await gamesService.GetConfiguration(HttpContext.RequestAborted);
+        if (nextGame == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(nextGame);
+    }
+
+    [AllowAnonymous]
     [HttpGet("active")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

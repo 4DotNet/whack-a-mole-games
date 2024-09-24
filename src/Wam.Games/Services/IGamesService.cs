@@ -20,4 +20,5 @@ public interface IGamesService
     Task<GameDetailsDto> Finish(Guid gameId, CancellationToken cancellationToken);
     Task<GameDetailsDto> Cancel(Guid gameId, CancellationToken cancellationToken);
 
+    Task<GameConfigurationResponse> GetConfiguration(CancellationToken httpContextRequestAborted);
 }
