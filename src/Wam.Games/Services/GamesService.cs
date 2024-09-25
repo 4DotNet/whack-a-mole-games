@@ -153,8 +153,10 @@ ILogger<GamesService> logger) : IGamesService
                     "Player passed no voucher or an invalid voucher code");
             }
             var vouchersApiAppId = servicesConfiguration.Value.VouchersService ?? "wam-vouchers-api";
+            logger.LogInformation("Claiming voucher {voucherId} for player {userId} to {daprId}", voucherId, userId, vouchersApiAppId);
             var httpRequest = daprClient.CreateInvokeMethodRequest(HttpMethod.Put, vouchersApiAppId, $"api/{voucherId}/claim/{playerModel.Id}");
             var response = await daprClient.InvokeMethodWithResponseAsync(httpRequest, cancellationToken);
+            logger.LogInformation("Claiming voucher response {response}", response.StatusCode);
             if (!response.IsSuccessStatusCode)
             {
                 throw new WamGameException(WamGameErrorCode.InvalidGameVoucher,
