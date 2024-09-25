@@ -29,6 +29,8 @@ catch (Exception ex)
 }
 // Add services to the container.
 
+builder.Services.AddHttpClient<IGamesService, GamesService>()
+    .AddStandardResilienceHandler();
 builder.Services.AddHttpClient<IUsersService, UsersService>()
     .AddStandardResilienceHandler();
 
