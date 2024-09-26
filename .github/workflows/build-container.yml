@@ -69,6 +69,7 @@ jobs:
         working-directory: infrastructure
         run: |
           bicep build-params test.main.bicepparam
+          bicep build-params prod.main.bicepparam
           az bicep build --file main.bicep
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
@@ -76,7 +77,7 @@ jobs:
           name: bicep-templates
           path: infrastructure/*.json
 
-  infrastructure-incremental-test:
+  test-deployment:
     if: github.event_name == 'push'
     needs: [build, publish-bicep, versionize]
     runs-on: ubuntu-latest
@@ -101,3 +102,29 @@ jobs:
         uses: Azure/cli@v1
         with:
           inlineScript: az deployment sub create --name $IMAGE_NAME --location northeurope --template-file ./infrastructure/main.json --parameters ./infrastructure/test.main.json --parameters containerVersion=${{needs.versionize.outputs.semver}} acrLoginServer=${{ secrets.ACR_LOGIN_SERVER }} acrUsername=${{ secrets.ACR_USERNAME }} acrPassword=${{ secrets.ACR_PASSWORD }}
+
+  production-deployment:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test-deployment]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bicep-templates
+          path: ./infrastructure
+      - name: Az CLI login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.WAM_PRD_CLIENT_ID }}
+          tenant-id: ${{ secrets.WAM_PRD_TENANT_ID }}
+          subscription-id: ${{ secrets.WAM_PRD_SUBSCRIPTION_ID }}
+      - name: Deploy Infrastructure
+        id: arm
+        uses: Azure/cli@v1
+        with:
+          inlineScript: az deployment sub create --name $IMAGE_NAME --location northeurope --template-file ./infrastructure/main.json --parameters ./infrastructure/prod.main.json --parameters containerVersion=${{needs.versionize.outputs.semver}} acrLoginServer=${{ secrets.ACR_LOGIN_SERVER }} acrUsername=${{ secrets.ACR_USERNAME }} acrPassword=${{ secrets.ACR_PASSWORD }}
