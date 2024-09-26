@@ -101,7 +101,7 @@ jobs:
         id: arm
         uses: Azure/cli@v1
         with:
-          inlineScript: az deployment sub create --name $IMAGE_NAME --location northeurope --template-file ./infrastructure/main.json --parameters ./infrastructure/test.main.json --parameters containerVersion=${{needs.versionize.outputs.semver}} acrLoginServer=${{ secrets.ACR_LOGIN_SERVER }} acrUsername=${{ secrets.ACR_USERNAME }} acrPassword=${{ secrets.ACR_PASSWORD }}
+          inlineScript: az deployment sub create --name test-$IMAGE_NAME --location northeurope --template-file ./infrastructure/main.json --parameters ./infrastructure/test.main.json --parameters containerVersion=${{needs.versionize.outputs.semver}} acrLoginServer=${{ secrets.ACR_LOGIN_SERVER }} acrUsername=${{ secrets.ACR_USERNAME }} acrPassword=${{ secrets.ACR_PASSWORD }}
 
   production-deployment:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -127,4 +127,4 @@ jobs:
         id: arm
         uses: Azure/cli@v1
         with:
-          inlineScript: az deployment sub create --name $IMAGE_NAME --location northeurope --template-file ./infrastructure/main.json --parameters ./infrastructure/prod.main.json --parameters containerVersion=${{needs.versionize.outputs.semver}} acrLoginServer=${{ secrets.ACR_LOGIN_SERVER }} acrUsername=${{ secrets.ACR_USERNAME }} acrPassword=${{ secrets.ACR_PASSWORD }}
+          inlineScript: az deployment sub create --name prod-$IMAGE_NAME --location northeurope --template-file ./infrastructure/main.json --parameters ./infrastructure/prod.main.json --parameters containerVersion=${{needs.versionize.outputs.semver}} acrLoginServer=${{ secrets.ACR_LOGIN_SERVER }} acrUsername=${{ secrets.ACR_USERNAME }} acrPassword=${{ secrets.ACR_PASSWORD }}
