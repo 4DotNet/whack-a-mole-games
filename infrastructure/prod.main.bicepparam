@@ -1,6 +1,6 @@
 using './main.bicep'
 
-param systemName = 'wam-users-api'
+param systemName = 'wam-games-api'
 param environmentName = 'prd'
 param locationAbbreviation = 'ne'
 param developersGroup = '397a477e-c6d9-49ff-8652-b434a7a90a82'
