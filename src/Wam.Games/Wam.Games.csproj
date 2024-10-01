@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Wam.Core" Version="0.3.0" />
+    <PackageReference Include="Wam.Core" Version="0.3.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -170,9 +170,15 @@ public class GamesService: IGamesService
 
     private async Task<bool> ClaimVoucher(Guid playerId, Guid voucherId, CancellationToken cancellationToken)
     {
-        var client = DaprClient.CreateInvokeHttpClient();
-        var voucherClaimResponse =await  client.GetAsync($"http://wam-vouchers-api/api/vouchers/{voucherId}/claim/{playerId}", cancellationToken);
-        return voucherClaimResponse.IsSuccessStatusCode;
+        var daprClientResponse = _daprClient.InvokeMethodAsync(HttpMethod.Get, "wam-vouchers-api", $"api/vouchers/{voucherId}/claim/{playerId}",
+            cancellationToken);
+
+        await daprClientResponse.WaitAsync(cancellationToken);
+        return daprClientResponse.IsCompletedSuccessfully;
+
+        //var client = DaprClient.CreateInvokeHttpClient();
+        //var voucherClaimResponse =await  client.GetAsync($"http://wam-vouchers-api/api/vouchers/{voucherId}/claim/{playerId}", cancellationToken);
+        //return voucherClaimResponse.IsSuccessStatusCode;
     }
 
 
