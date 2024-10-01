@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using Azure.Core;
 using Azure.Messaging.WebPubSub;
 using Microsoft.Extensions.Configuration;
@@ -160,12 +161,20 @@ public class GamesService: IGamesService
         return dto;
     }
 
+    //private async Task<bool> ClaimVoucher(Guid playerId, Guid voucherId, CancellationToken cancellationToken)
+    //{
+    //        var uri = $"{RemoteServiceUrl.Value}/vouchers/{voucherId}/claim/{playerId}";
+    //        var response= await _httpClient.GetAsync(uri, cancellationToken);
+    //        return response.IsSuccessStatusCode;
+    //}
+
     private async Task<bool> ClaimVoucher(Guid playerId, Guid voucherId, CancellationToken cancellationToken)
     {
-            var uri = $"{RemoteServiceUrl.Value}/vouchers/{voucherId}/claim/{playerId}";
-            var response= await _httpClient.GetAsync(uri, cancellationToken);
-            return response.IsSuccessStatusCode;
+        var client = DaprClient.CreateInvokeHttpClient();
+        var voucherClaimResponse =await  client.GetAsync($"http://wam-vouchers-api/api/vouchers/{voucherId}/claim/{playerId}", cancellationToken);
+        return voucherClaimResponse.IsSuccessStatusCode;
     }
+
 
     public async Task<GameDetailsDto> Leave(Guid gameId, Guid playerId, CancellationToken cancellationToken)
     {
