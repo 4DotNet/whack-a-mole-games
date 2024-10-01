@@ -28,15 +28,13 @@ catch (Exception ex)
     throw new Exception("Failed to configure the Whack-A-Mole Games service, Azure App Configuration failed", ex);
 }
 // Add services to the container.
-
+builder.Services
+    .AddWamCoreConfiguration(builder.Configuration, false, nameof(ServicesConfiguration.GamesService))
+    .AddWamGamesModule();
 builder.Services.AddHttpClient<IGamesService, GamesService>()
     .AddStandardResilienceHandler();
 builder.Services.AddHttpClient<IUsersService, UsersService>()
     .AddStandardResilienceHandler();
-
-builder.Services
-    .AddWamCoreConfiguration(builder.Configuration, false, nameof(ServicesConfiguration.GamesService))
-    .AddWamGamesModule();
 
 builder.Services.AddCors(options =>
 {
