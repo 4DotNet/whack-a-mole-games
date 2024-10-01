@@ -8,6 +8,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddWamGamesModule(this IServiceCollection services)
     {
+        services.AddTransient<IUsersService, UsersService>();
         services.AddTransient<IGamesService, GamesService>();
         services.AddTransient<IGamesRepository, GamesRepository>();
         return services;
