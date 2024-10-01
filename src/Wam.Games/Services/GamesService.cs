@@ -2,6 +2,7 @@ using Azure.Core;
 using Azure.Messaging.WebPubSub;
 using Microsoft.Extensions.Logging;
 using Dapr.Client;
+using Microsoft.ApplicationInsights;
 using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
 using Wam.Core.Cache;
@@ -15,6 +16,7 @@ using Wam.Games.ExtensionMethods;
 using Wam.Games.Repositories;
 using Wam.Core.Configuration;
 using Wam.Core.Enums;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Wam.Games.Services;
 
@@ -27,6 +29,7 @@ public class GamesService(
     WebPubSubServiceClient pubsubClient,
     IFeatureManager featureManager,
     IOptions<ServicesConfiguration> servicesConfiguration,
+    TelemetryClient telemetryClient,
     ILogger<GamesService> logger)
     : IGamesService
 {
@@ -152,6 +155,7 @@ public class GamesService(
         }
         game.AddPlayer(playerModel);
         var dto = await SaveAndReturnDetails(game, cancellationToken);
+        telemetryClient.TrackMetric("PlayerJoined", 1);
         await PlayerAddedEvent(code, playerModel);
         return dto;
     }
