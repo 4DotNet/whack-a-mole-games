@@ -31,10 +31,10 @@ catch (Exception ex)
 builder.Services
     .AddWamCoreConfiguration(builder.Configuration, false, nameof(ServicesConfiguration.GamesService))
     .AddWamGamesModule();
-builder.Services.AddHttpClient<IGamesService, GamesService>()
-    .AddStandardResilienceHandler();
-builder.Services.AddHttpClient<IUsersService, UsersService>()
-    .AddStandardResilienceHandler();
+//builder.Services.AddHttpClient<IGamesService, GamesService>()
+//    .AddStandardResilienceHandler();
+//builder.Services.AddHttpClient<IUsersService, UsersService>()
+//    .AddStandardResilienceHandler();
 
 builder.Services.AddCors(options =>
 {
